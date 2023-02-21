@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Cagliostro', sans-serif;
+      background: url(https://i.ibb.co/gZJ7mXf/pexels-abdullah-ghatasheh-1631677.jpg);
+      background-attachment: fixed;
+      background-repeat: repeat-y;
+      background-size: cover;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: bolder;
+      text-align: center;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .container {
+      margin: auto;
+      margin-bottom: 20px;
+      margin-top: 20px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      border: 1px solid white;
+      padding-top: 35px;
+    }
+
+    .darker {
+      background: linear-gradient(rgba(255, 255, 255, .5), rgba(255, 255, 255, .5)), url(https://i.ibb.co/C6phFNR/pexels-henry-co-1939485.jpg);
+      background-size: cover;
+    }
+
+    .time {
+      font-style: italic;
+      opacity: 0.6;
+      font-size: 0.8rem;
+    }
+
+    /* 
+
+
+.container::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.container img {
+  float: left;
+  max-width: 60px;
+  width: 100%;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+.container img.right {
+  float: right;
+  margin-left: 20px;
+  margin-right:0;
+}
+
+ */
+  </style>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+  <h1 style="font-size: 1rem;">Current Room <span style="font-size: 3rem;">{{room}}</span></h1>
+
+  <div id="display"></div>
+
+  <script>
+    $(document).ready(function () {
+      setInterval(function () {
+        $.ajax({
+          type: 'GET',
+          url: "/getMessages/{{room}}/",
+          success: function (response) {
+            console.log(response);
+            $("#display").empty();
+            for (var key in response.messages) {
+              var temp = "<div class='container darker'><b>" + response.messages[key].user + "</b><p>" + response.messages[key].value + "</p><span class='time'>" + response.messages[key].date.replace('T', ' ').replace('Z', ' ') + "</span></div>";
+              $("#display").append(temp);
+            }
+          },
+          error: function (response) {
+            //alert('An error occured')
+          }
+        });
+      }, 1000);
+    })
+  </script>
+
+
+  <div class="container">
+
+    <style>
+      input[type=text] {
+        width: 100%;
+        box-sizing: border-box;
+        display: inline-block;
+        padding: 15px;
+        margin-bottom: 0;
+        border: 1px solid rgba(0, 0, 0, 0.699);
+        border-radius: 10px;
+      }
+
+
+      input[type=submit] {
+        width: 30%;
+        display: block;
+        margin: 0 auto;
+        background: url(https://i.ibb.co/ZLjrZv1/pexels-gradienta-7135057.jpg);
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: black;
+        font-size: 1.1rem;
+      }
+
+
+      input[type=submit]:hover {
+        background: url(https://i.ibb.co/Gdn0pSH/pexels-gradienta-7130499.jpg);
+      }
+    </style>
+
+    <form id="post-form">
+      {% csrf_token %}
+      <input type="hidden" name="username" id="username" value="{{username}}" />
+      <input type="hidden" name="room_id" id="room_id" value="{{room_details.id}}" />
+      <input type="text" name="message" id="message" width="100px" />
+      <input type="submit" value="Send">
+    </form>
+  </div>
+
+</body>
+<script type="text/javascript">
+  $(document).on('submit', '#post-form', function (e) {
+    e.preventDefault();
+
+    $.ajax({
+      type: 'POST',
+      url: '/send',
+      data: {
+        username: $('#username').val(),
+        room_id: $('#room_id').val(),
+        message: $('#message').val(),
+        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success: function (data) {
+        //alert(data)
+      }
+    });
+    document.getElementById('message').value = ''
+  });
+</script>
+
+</html>
